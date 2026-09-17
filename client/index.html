@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#1d232a" />
+    <meta name="description" content="Mesh Notes - Self-hosted notes & bookmark manager" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Mesh Notes" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>Mesh Notes</title>
+  </head>
+  <body class="bg-base-300 text-base-content antialiased select-auto min-h-screen overflow-x-hidden">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then((reg) => {
+            // Check for service worker updates immediately
+            reg.update();
+            console.log('[PWA] Service Worker registered with scope:', reg.scope);
+          }).catch((err) => {
+            console.warn('[PWA] Service Worker registration failed:', err);
+          });
+        });
+
+        // Listen for new service worker taking control
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('[PWA] New controller active - page refreshed with latest version');
+        });
+      }
+    </script>
+  </body>
+</html>

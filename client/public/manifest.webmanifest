@@ -1,0 +1,18 @@
+{
+  "name": "Mesh Notes",
+  "short_name": "MeshNotes",
+  "description": "Open-Source Self-Hosted Notes & Bookmark Manager",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1d232a",
+  "theme_color": "#6419e6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
