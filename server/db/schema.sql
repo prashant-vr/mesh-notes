@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   role TEXT CHECK(role IN ('user', 'admin', 'superadmin')) DEFAULT 'user',
   status TEXT CHECK(status IN ('active', 'suspended')) DEFAULT 'active',
+  email_verified INTEGER DEFAULT 0,
+  verification_token TEXT,
+  verification_token_expires_at INTEGER,
   token_version INTEGER DEFAULT 1,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL

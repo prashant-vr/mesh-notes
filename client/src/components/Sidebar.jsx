@@ -307,9 +307,16 @@ export const Sidebar = ({
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-sm tracking-tight leading-none">Mesh Notes</span>
-                <span className="text-[10px] text-base-content/50 mt-0.5 truncate max-w-[120px]">
-                  {user?.email || 'Self-hosted'}
-                </span>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <span className="text-[10px] text-base-content/50 truncate max-w-[100px]" title={user?.email}>
+                    {user?.email || 'Self-hosted'}
+                  </span>
+                  {user?.email_verified === 1 ? (
+                    <span className="text-[9px] text-success" title="Email verified">●</span>
+                  ) : (
+                    <span className="text-[9px] text-warning" title="Email pending verification">○</span>
+                  )}
+                </div>
               </div>
             </div>
 

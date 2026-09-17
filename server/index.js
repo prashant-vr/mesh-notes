@@ -26,6 +26,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
+// Load environment variables from .env if present
+const envPath = path.join(rootDir, '.env');
+if (fs.existsSync(envPath) && typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile(envPath);
+    console.log('[Config] Loaded environment variables from .env');
+  } catch (err) {
+    console.warn('[Config] Notice: Could not load .env file:', err.message);
+  }
+}
+
 const startServer = async () => {
   const app = express();
 

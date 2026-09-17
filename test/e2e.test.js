@@ -67,6 +67,15 @@ const runTests = async () => {
   assert.ok(token, 'Should receive JWT token');
   console.log('✓ User registration passed');
 
+  // Test resend verification endpoint
+  const resendRes = await fetch(`${BASE_URL}/api/auth/resend-verification`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: testEmail })
+  });
+  assert.strictEqual(resendRes.status, 200, 'Resend verification should return 200');
+  console.log('✓ Email verification resend endpoint passed');
+
   const meRes = await fetch(`${BASE_URL}/api/auth/me`, {
     headers: { Authorization: `Bearer ${token}` }
   });

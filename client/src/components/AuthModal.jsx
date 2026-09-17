@@ -1,23 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { ShieldCheck, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, Loader2, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { apiVerifyEmail, apiResendVerification } from '../api.js';
 
 export const AuthView = () => {
-  const { login, register } = useAuth();
+  const { login, register, verifyEmail } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Verification state
+  const [verifying, setVerifying] = useState(false);
+  const [verifyStatus, setVerifyStatus] = useState(null); // 'success' | 'error' | null
+  const [needsVerificationNotice, setNeedsVerificationNotice] = useState(false);
+  const [resending, setResending] = useState(false);
+
+  // Check URL query parameters for ?verify=token
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('verify');
+    if (token) {
+      setVerifying(true);
+      apiVerifyEmail(token)
+        .then((res) => {
+          setVerifyStatus('success');
+          setSuccessMsg('Email verified successfully! You are now signed in.');
+          verifyEmail(res.token, res.user);
+          // Clean up URL parameter without full reload
+          window.history.replaceState({}, document.title, window.location.pathname);
+        })
+        .catch((err) => {
+          setVerifyStatus('error');
+          setError(err.message || 'Verification token is invalid or has expired.');
+        })
+        .finally(() => {
+          setVerifying(false);
+        });
+    }
+  }, [verifyEmail]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setSuccessMsg(null);
     setLoading(true);
 
     try {
       if (isRegister) {
-        await register(email, password);
+        const res = await register(email, password);
+        if (res.email_verification_required && res.user.email_verified === 0) {
+          setNeedsVerificationNotice(true);
+          setSuccessMsg('Account created! A verification link has been sent to your email.');
+        }
       } else {
         await login(email, password);
       }
@@ -25,6 +62,23 @@ export const AuthView = () => {
       setError(err.message || 'Authentication failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email) {
+      setError('Please enter your email address to resend verification.');
+      return;
+    }
+    setResending(true);
+    setError(null);
+    try {
+      const res = await apiResendVerification(email);
+      setSuccessMsg(res.message || 'Verification link resent. Please check your inbox.');
+    } catch (err) {
+      setError(err.message || 'Failed to resend verification email.');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -75,15 +129,47 @@ export const AuthView = () => {
             </div>
           </div>
 
+          {verifying && (
+            <div className="alert alert-info text-xs py-2 mb-3">
+              <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+              <span>Verifying your email token...</span>
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="alert alert-success text-xs py-2 mb-3">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
           {error && (
-            <div className="alert alert-error text-xs py-2">
+            <div className="alert alert-error text-xs py-2 mb-3">
+              <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
+            </div>
+          )}
+
+          {needsVerificationNotice && (
+            <div className="bg-base-200 p-3 rounded-lg border border-base-content/10 text-xs space-y-2 mb-3">
+              <p className="font-semibold text-base-content">Verify your email address</p>
+              <p className="text-base-content/70">
+                We sent a confirmation link to <span className="font-mono font-medium">{email}</span>. Please click the link to activate all workspace features.
+              </p>
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resending}
+                className="btn btn-xs btn-outline w-full"
+              >
+                {resending ? 'Resending...' : 'Resend Verification Email'}
+              </button>
             </div>
           )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || verifying}
             className="btn btn-primary w-full gap-2 mt-2 shadow-sm"
           >
             {loading ? (

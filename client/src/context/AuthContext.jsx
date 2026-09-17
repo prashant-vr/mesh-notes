@@ -45,18 +45,24 @@ export const AuthProvider = ({ children }) => {
     const res = await apiRegister(email, password);
     setStoredToken(res.token);
     setUser(res.user);
-    return res.user;
+    return res;
+  };
+
+  const verifyEmail = (token, userObj) => {
+    setStoredToken(token);
+    setUser(userObj);
   };
 
   const logout = async () => {
     try {
       await apiLogout();
     } catch (_) {}
+    setStoredToken(null);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser: fetchCurrentUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, verifyEmail, refreshUser: fetchCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );

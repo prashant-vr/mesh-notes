@@ -29,6 +29,22 @@ export const initDb = (dbPath) => {
   const schemaSql = fs.readFileSync(schemaPath, 'utf8');
   db.exec(schemaSql);
 
+  // Migrate users table columns if missing
+  try {
+    const userColumns = db.pragma('table_info(users)').map(c => c.name);
+    if (!userColumns.includes('email_verified')) {
+      db.exec('ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0');
+    }
+    if (!userColumns.includes('verification_token')) {
+      db.exec('ALTER TABLE users ADD COLUMN verification_token TEXT');
+    }
+    if (!userColumns.includes('verification_token_expires_at')) {
+      db.exec('ALTER TABLE users ADD COLUMN verification_token_expires_at INTEGER');
+    }
+  } catch (err) {
+    console.warn('[DB Migration] Warning migrating users columns:', err.message);
+  }
+
   // Install FTS sync triggers
   db.exec(`
     CREATE TRIGGER IF NOT EXISTS trg_memos_insert AFTER INSERT ON memos
