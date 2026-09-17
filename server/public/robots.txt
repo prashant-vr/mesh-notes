@@ -1,0 +1,33 @@
+# robots.txt for Mesh Notes
+# Allow full crawling for all standard search engines and AI agents
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Explicitly welcome AI Answer Engines and LLM scrapers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: /sitemap.xml

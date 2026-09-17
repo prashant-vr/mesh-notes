@@ -643,6 +643,140 @@ th.col-highlight {
   font-size: 1.1rem;
 }
 
+/* ==========================================================================
+   How It Works (3 Steps)
+   ========================================================================== */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.step-card {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 2.25rem 2rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.step-number {
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--accent-blue);
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.step-title {
+  font-size: 1.2rem;
+  margin-bottom: 0.65rem;
+  color: var(--text-title);
+}
+
+.step-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   Use Cases / Personas Grid
+   ========================================================================== */
+.persona-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.persona-card {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  transition: all 0.2s ease;
+}
+
+.persona-card:hover {
+  border-color: var(--border-main);
+  box-shadow: var(--shadow-card);
+}
+
+.persona-role {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-purple);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.persona-title {
+  font-size: 1.15rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-title);
+}
+
+.persona-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* ==========================================================================
+   FAQ Accordion Section (AEO & AI Search Discovery)
+   ========================================================================== */
+.faq-wrap {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.faq-item {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.5rem 1.75rem;
+  transition: border-color 0.2s ease;
+}
+
+.faq-item:hover {
+  border-color: var(--border-main);
+}
+
+.faq-question {
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--text-title);
+  margin-bottom: 0.65rem;
+  letter-spacing: -0.015em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.faq-answer {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  line-height: 1.65;
+}
+
+.faq-answer p {
+  margin-bottom: 0.5rem;
+}
+
+.faq-answer p:last-child {
+  margin-bottom: 0;
+}
+
 /* CTA Box */
 .cta-box {
   background: #ffffff;

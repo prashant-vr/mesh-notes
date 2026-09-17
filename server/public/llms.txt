@@ -1,0 +1,28 @@
+# Mesh Notes
+
+> Mesh Notes is a 100% free, open-source personal workspace and note-taking application that runs locally using a single SQLite database file. It combines quick notes, distraction-free web bookmarks, a code snippet vault, daily habits/journaling, spaced repetition flashcards, and a multi-currency domain/expense manager.
+
+## Core Identity
+- **Name**: Mesh Notes
+- **Category**: Personal Knowledge Management (PKM), Note-Taking, Productivity, Expense & Domain Tracker
+- **License**: Open Source (Free Forever, $0)
+- **Data Model**: Local-first, single SQLite file (`mesh-notes.db`). Zero cloud telemetry, zero remote tracking.
+- **Platforms**: Web Application, Progressive Web App (PWA), Self-hosted Node.js (macOS, Linux, Windows, Docker)
+
+## Key Features & Capabilities
+1. **Unified Stream & Folders**: Chronological feed for fleeting thoughts, structured markdown notes, and unfurled web bookmarks with folder trees and instant #hashtag indexing.
+2. **Code Snippet Vault**: Gist-style repository for code snippets, regex, SQL queries, and shell scripts with syntax highlighting for 20+ languages and 1-click clipboard copying.
+3. **Daily Habits & Journal**: Automatic daily template generation every morning. Mood scoring, gratitude reflections, and interactive habit checklists.
+4. **Finance & Domain Tracker**: Track domain renewals, hosting subscriptions, and recurring SaaS expenses. Supports INR (₹), USD ($), EUR (€), JPY (¥), CNY (¥), and RUB (₽) with associated login account emails.
+5. **Spaced Repetition Flashcards**: Lightweight SM-2 spaced repetition algorithm for memorizing programming shortcuts, terminology, and language concepts.
+6. **Highlights & Web Reader**: Distraction-free reader view that strips ads and cookie walls from saved URLs with passage highlighting.
+7. **Burn-After-Reading Shares**: Share sensitive notes via password-protected links or 1-time view self-destruct links.
+8. **Full Data Portability**: 1-click backup zip export containing clean Markdown files with YAML frontmatter and Netscape HTML bookmarks.
+
+## Documentation & Links
+- Getting Started: /docs/getting-started
+- Notes & Formatting: /docs/notes-and-formatting
+- Productivity Apps: /docs/productivity-apps
+- Privacy & Sharing: /docs/privacy-and-sharing
+- Self-Hosting Guide: /docs/self-hosting
+- Web App: /app
