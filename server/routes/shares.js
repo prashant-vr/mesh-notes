@@ -69,12 +69,13 @@ router.post('/', authenticate, (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?, 0, 1, ?)
   `).run(shareToken, memo_id, userId, share_type, passwordHash, parsedMaxViews, now);
 
-  logAudit(userId, 'create_share_link', 'success', {
+  logAudit(userId, 'create_share_link', {
     shareId: shareToken,
     memoId: memo_id,
     shareType: share_type,
     maxViews: parsedMaxViews
-  });
+  }, 'success');
+
 
   return res.status(201).json({
     share: {
@@ -133,7 +134,8 @@ router.delete('/:id', authenticate, (req, res) => {
     db.prepare("UPDATE memos SET visibility = 'private', updated_at = ? WHERE id = ?").run(Date.now(), share.memo_id);
   }
 
-  logAudit(userId, 'revoke_share_link', 'success', { shareId: id, memoId: share.memo_id });
+  logAudit(userId, 'revoke_share_link', { shareId: id, memoId: share.memo_id }, 'success');
+
 
   return res.json({ success: true, message: 'Share link revoked.' });
 });
@@ -201,11 +203,12 @@ router.get('/view/:token', (req, res) => {
     // If max views exhausted, revert memo to private
     if (share.max_views !== null && currentViews >= share.max_views) {
       db.prepare("UPDATE memos SET visibility = 'private', updated_at = ? WHERE id = ?").run(Date.now(), share.memo_id);
-      logAudit(share.user_id, 'share_exhausted_private', 'success', {
+      logAudit(share.user_id, 'share_exhausted_private', {
         shareId: share.id,
         memoId: share.memo_id,
         views: currentViews
-      });
+      }, 'success');
+
     }
   }
 

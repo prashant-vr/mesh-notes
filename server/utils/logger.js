@@ -6,7 +6,16 @@ export const setDbForLogger = (db) => {
   dbInstance = db;
 };
 
-export const logAudit = (userId, action, details = {}, status = 'success') => {
+export const logAudit = (userId, action, param3 = {}, param4 = 'success') => {
+  let details = param3;
+  let status = param4;
+
+  // Handle callers that pass status before details: (userId, action, 'success', detailsObj)
+  if (typeof param3 === 'string' && typeof param4 === 'object' && param4 !== null) {
+    status = param3;
+    details = param4;
+  }
+
   const timestamp = new Date().toISOString();
   console.log(`[AUDIT] [${timestamp}] [${action}] user:${userId || 'system'} status:${status}`, details);
 
@@ -21,7 +30,7 @@ export const logAudit = (userId, action, details = {}, status = 'success') => {
         userId || null,
         action,
         typeof details === 'object' ? JSON.stringify(details) : String(details),
-        status,
+        typeof status === 'string' ? status : 'success',
         Date.now()
       );
     } catch (err) {
@@ -29,6 +38,7 @@ export const logAudit = (userId, action, details = {}, status = 'success') => {
     }
   }
 };
+
 
 export const logInfo = (message, data) => {
   if (data !== undefined) {

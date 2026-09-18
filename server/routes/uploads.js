@@ -50,12 +50,13 @@ router.post('/', authenticate, (req, res) => {
 
     const publicUrl = `/api/uploads/${req.file.filename}`;
 
-    logAudit(req.user.id, 'upload_image', 'success', {
+    logAudit(req.user.id, 'upload_image', {
       filename: req.file.filename,
       originalName: req.file.originalname,
       size: req.file.size,
       mimeType: req.file.mimetype
-    });
+    }, 'success');
+
 
     return res.status(201).json({
       url: publicUrl,
