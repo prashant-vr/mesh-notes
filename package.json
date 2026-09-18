@@ -8,7 +8,8 @@
     "build": "npm --prefix client run build",
     "dev:client": "npm --prefix client run dev",
     "dev:server": "node server/index.js",
-    "test": "node --test"
+    "test": "node --test",
+    "postinstall": "npm --prefix client install"
   },
   "keywords": [],
   "author": "",
@@ -16,7 +17,6 @@
   "type": "module",
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "@tiptap/react": "^3.31.3",
     "archiver": "^8.0.0",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^13.0.3",
