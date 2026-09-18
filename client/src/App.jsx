@@ -42,7 +42,9 @@ import {
   BookMarked,
   LayoutList,
   LayoutGrid,
-  Rows3
+  Rows3,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 export const App = () => {
@@ -53,11 +55,21 @@ export const App = () => {
   const [sortOption, setSortOption] = useState('newest'); // 'newest' | 'oldest' | 'updated'
   const [typeToggle, setTypeToggle] = useState('all'); // 'all' | 'note' | 'bookmark'
   const [streamLayout, setStreamLayout] = useState(() => localStorage.getItem('mesh_notes_layout') || 'stream'); // 'stream' | 'grid' | 'compact'
+  const [privacyMode, setPrivacyMode] = useState(() => localStorage.getItem('mesh_privacy_mode') === 'true');
+
+  const handleTogglePrivacyMode = () => {
+    setPrivacyMode((prev) => {
+      const next = !prev;
+      localStorage.setItem('mesh_privacy_mode', String(next));
+      return next;
+    });
+  };
 
   const handleLayoutChange = (mode) => {
     setStreamLayout(mode);
     localStorage.setItem('mesh_notes_layout', mode);
   };
+
 
   // Data states
   const [memos, setMemos] = useState([]);
@@ -297,6 +309,14 @@ export const App = () => {
           <div className="flex items-center gap-1">
             <button
               type="button"
+              onClick={handleTogglePrivacyMode}
+              className={`btn btn-sm btn-ghost btn-square ${privacyMode ? 'text-primary' : 'text-base-content/60'}`}
+              title={privacyMode ? 'Privacy Mode: Enabled (click to reveal)' : 'Privacy Mode: Disabled'}
+            >
+              {privacyMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+            <button
+              type="button"
               onClick={() => setIsSearchOpen(true)}
               className="btn btn-sm btn-ghost btn-square"
               title="Quick Search (Cmd+K)"
@@ -492,6 +512,21 @@ export const App = () => {
                 </ul>
               </div>
 
+              {/* Privacy Mode Toggle */}
+              <button
+                type="button"
+                onClick={handleTogglePrivacyMode}
+                className={`btn btn-xs gap-1 font-normal ${
+                  privacyMode
+                    ? 'btn-warning text-warning-content font-medium shadow-xs'
+                    : 'btn-ghost text-base-content/70 hover:text-base-content'
+                }`}
+                title={privacyMode ? 'Privacy Mode is active (Notes blurred). Click to reveal.' : 'Turn on Privacy Mode to hide notes from shoulder surfers.'}
+              >
+                {privacyMode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">{privacyMode ? 'Privacy On' : 'Privacy'}</span>
+              </button>
+
               {/* Layout Switcher (Stream / Grid / Compact) */}
               <div className="join bg-base-200/80 p-0.5 rounded-lg border border-base-content/10 shrink-0">
                 <button
@@ -549,6 +584,7 @@ export const App = () => {
                   key={memo.id}
                   memo={memo}
                   layout={streamLayout}
+                  privacyMode={privacyMode}
                   onTogglePin={handleTogglePin}
                   onDelete={handleDeleteMemo}
                   onEdit={handleEditMemo}

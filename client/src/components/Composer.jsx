@@ -22,8 +22,11 @@ import {
   Code,
   Minus,
   Slash,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Trash2
 } from 'lucide-react';
+
+
 import { marked } from 'marked';
 import { apiUploadImage } from '../api.js';
 import { WysiwygToolbar } from './WysiwygToolbar.jsx';
@@ -150,7 +153,36 @@ const SLASH_COMMANDS = [
   }
 ];
 
+// Extract all images in content (both <img ...> and ![alt](url)) for visual preview & interactive resizing
+const extractImagesFromContent = (text) => {
+  if (!text) return [];
+  const images = [];
+  // 1. Match HTML <img ...>
+  const imgRegex = /<img\s+([^>]*?)src=["']([^"']+)["']([^>]*?)\/?>/gi;
+  let match;
+  while ((match = imgRegex.exec(text)) !== null) {
+    const fullMatch = match[0];
+    const src = match[2];
+    const combinedAttrs = match[1] + ' ' + match[3];
+    const widthMatch = combinedAttrs.match(/width=["']([^"']+)["']/i);
+    const width = widthMatch ? widthMatch[1] : '100%';
+    const altMatch = combinedAttrs.match(/alt=["']([^"']+)["']/i);
+    const alt = altMatch ? altMatch[1] : 'image';
+    images.push({ fullMatch, src, width, alt, isHtml: true });
+  }
+  // 2. Match markdown ![alt](url)
+  const mdRegex = /!\[([^\]]*?)\]\(([^)\s]+)\)/gi;
+  while ((match = mdRegex.exec(text)) !== null) {
+    const fullMatch = match[0];
+    const alt = match[1] || 'image';
+    const src = match[2];
+    images.push({ fullMatch, src, width: '100%', alt, isHtml: false });
+  }
+  return images;
+};
+
 export const Composer = ({
+
   folders = [],
   folderTree = [],
   tags = [],
@@ -186,7 +218,12 @@ export const Composer = ({
     }
   }, [initialValue]);
 
-  // Upload and insert image markdown
+  // Detected images in active note content
+  const attachedImages = extractImagesFromContent(content);
+
+
+
+  // Upload and insert image markdown/HTML
   const uploadAndInsertImage = async (file) => {
     if (!file || !file.type.startsWith('image/')) return;
     try {
@@ -197,15 +234,15 @@ export const Composer = ({
       const cursor = textarea ? textarea.selectionStart : text.length;
 
       const altText = (file.name || 'image').replace(/\.[^/.]+$/, '');
-      const markdownImg = `\n![${altText}](${res.url})\n`;
+      const imgTag = `\n<img src="${res.url}" alt="${altText}" width="100%" />\n`;
 
-      const newContent = text.slice(0, cursor) + markdownImg + text.slice(cursor);
+      const newContent = text.slice(0, cursor) + imgTag + text.slice(cursor);
       setContent(newContent);
 
       setTimeout(() => {
         if (textarea) {
           textarea.focus();
-          const newPos = cursor + markdownImg.length;
+          const newPos = cursor + imgTag.length;
           textarea.setSelectionRange(newPos, newPos);
           textarea.style.height = 'auto';
           textarea.style.height = `${Math.min(textarea.scrollHeight, 350)}px`;
@@ -218,6 +255,30 @@ export const Composer = ({
       setIsUploadingImage(false);
     }
   };
+
+  // Change width of an image in content
+  const handleSetImageWidth = (imgItem, newWidth) => {
+    let replacement;
+    if (imgItem.isHtml) {
+      if (/width=["'][^"']*["']/i.test(imgItem.fullMatch)) {
+        replacement = imgItem.fullMatch.replace(/width=["'][^"']*["']/i, `width="${newWidth}"`);
+      } else {
+        replacement = imgItem.fullMatch.replace(/<img\s+/i, `<img width="${newWidth}" `);
+      }
+    } else {
+      // Convert markdown image to HTML img with width
+      replacement = `<img src="${imgItem.src}" alt="${imgItem.alt}" width="${newWidth}" />`;
+    }
+    const updated = content.replace(imgItem.fullMatch, replacement);
+    setContent(updated);
+  };
+
+  // Remove an image from content
+  const handleRemoveImage = (imgItem) => {
+    const updated = content.replace(imgItem.fullMatch, '').trim();
+    setContent(updated);
+  };
+
 
   const handlePaste = async (e) => {
     const items = e.clipboardData?.items;
@@ -615,12 +676,68 @@ export const Composer = ({
           </div>
         )}
 
-        {/* Magic URL detection indicator */}
-        {detectedUrl && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-base-200/80 rounded-lg text-xs text-primary font-medium w-fit mb-2 animate-fadeIn">
-            <Link2 className="w-3.5 h-3.5" />
-            <span className="truncate max-w-xs md:max-w-md">{detectedUrl}</span>
-            <span className="text-base-content/50 text-[10px] ml-1">(auto-unfurling link)</span>
+        {/* Attached Images Tray & Interactive Resizing */}
+        {attachedImages.length > 0 && (
+          <div className="mb-3 space-y-2 border border-base-content/10 bg-base-200/40 rounded-xl p-2.5">
+            <div className="flex items-center justify-between text-[11px] text-base-content/60 font-medium px-1">
+              <span className="flex items-center gap-1.5">
+                <ImageIcon className="w-3.5 h-3.5 text-secondary" />
+                Attached Images ({attachedImages.length})
+              </span>
+              <span className="text-[10px] text-base-content/40">Choose size or remove</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {attachedImages.map((imgItem, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-2.5 p-2 bg-base-100 rounded-lg border border-base-content/10 shadow-2xs group"
+                >
+                  <img
+                    src={imgItem.src}
+                    alt={imgItem.alt}
+                    className="w-14 h-14 object-cover rounded-md border border-base-content/10 shrink-0 bg-base-200"
+                  />
+                  <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[11px] font-medium truncate text-base-content/80">
+                        {imgItem.alt || 'Attached image'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(imgItem)}
+                        className="btn btn-ghost btn-xs btn-square h-5 w-5 text-error/60 hover:text-error shrink-0"
+                        title="Remove image from note"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+
+                    {/* Quick Resize Chips: 25%, 50%, 75%, 100% */}
+                    <div className="flex items-center gap-1">
+                      <span className="text-[9px] text-base-content/40 uppercase font-mono mr-0.5">Size:</span>
+                      {['25%', '50%', '75%', '100%'].map((w) => {
+                        const isSelected = imgItem.width === w;
+                        return (
+                          <button
+                            key={w}
+                            type="button"
+                            onClick={() => handleSetImageWidth(imgItem, w)}
+                            className={`btn btn-xs px-1.5 h-5 min-h-0 text-[10px] rounded ${
+                              isSelected
+                                ? 'btn-primary font-bold shadow-2xs'
+                                : 'btn-ghost bg-base-200 hover:bg-base-300 text-base-content/70'
+                            }`}
+                          >
+                            {w}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

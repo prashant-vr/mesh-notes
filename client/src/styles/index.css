@@ -122,3 +122,18 @@ body {
 .safe-pb {
   padding-bottom: env(safe-area-inset-bottom, 1rem);
 }
+
+/* Privacy Mode Content Masking */
+.privacy-masked {
+  filter: blur(8px);
+  user-select: none;
+  pointer-events: none;
+  transition: filter 0.2s ease;
+}
+
+.privacy-unmasked {
+  filter: none !important;
+  user-select: text !important;
+  pointer-events: auto !important;
+}
+

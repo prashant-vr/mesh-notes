@@ -1,6 +1,8 @@
 // Native fetch API client (ES6 functions only, NO axios, NO classes)
+import { compressToWebP } from './utils/imageCompressor.js';
 
 const getStoredToken = () => localStorage.getItem('mesh_notes_token');
+
 
 export const setStoredToken = (token) => {
   if (token) {
@@ -301,14 +303,16 @@ export const apiListLogs = (params = {}) => {
 };
 
 // 11. Uploads API
-export const apiUploadImage = (file) => {
+export const apiUploadImage = async (file) => {
+  const compressedFile = await compressToWebP(file);
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', compressedFile);
   return request('/api/uploads', {
     method: 'POST',
     body: formData
   });
 };
+
 
 // 12. Shares API
 export const apiCreateShare = (data) => request('/api/shares', {

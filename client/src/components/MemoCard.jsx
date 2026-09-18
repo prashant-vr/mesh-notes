@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { marked } from 'marked';
-import { Pin, Trash2, Edit3, Folder, Tag, Sparkles, Globe, Lock, Check, Share2 } from 'lucide-react';
+import { Pin, Trash2, Edit3, Folder, Tag, Sparkles, Globe, Lock, Check, Share2, Eye, EyeOff } from 'lucide-react';
 import { BookmarkCard } from './BookmarkCard.jsx';
 import { ShareModal } from './ShareModal.jsx';
+
 
 export const MemoCard = ({
   memo,
   layout = 'stream',
+  privacyMode = false,
   onTogglePin,
   onDelete,
   onEdit,
@@ -17,6 +19,11 @@ export const MemoCard = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(memo.content);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isUnmasked, setIsUnmasked] = useState(false);
+
+  // When privacyMode is on, card is masked unless explicitly unmasked by user click
+  const isMasked = privacyMode && !isUnmasked;
+
 
   const formattedDate = new Date(memo.created_at).toLocaleDateString(undefined, {
     month: 'short',
@@ -66,10 +73,13 @@ export const MemoCard = ({
           )}
 
           <span
-            onClick={() => setIsEditing(true)}
-            className="truncate text-base-content/90 font-medium cursor-pointer hover:text-primary transition-colors flex-1"
+            onClick={() => (isMasked ? setIsUnmasked(true) : setIsEditing(true))}
+            className={`truncate font-medium cursor-pointer transition-colors flex-1 ${
+              isMasked ? 'privacy-masked text-base-content/40 select-none' : 'text-base-content/90 hover:text-primary'
+            }`}
+            title={isMasked ? 'Click to reveal' : ''}
           >
-            {memo.content.split('\n')[0] || 'Empty note'}
+            {isMasked ? '••••••••••••••••••••••••' : (memo.content.split('\n')[0] || 'Empty note')}
           </span>
 
           {memo.tags && memo.tags.length > 0 && (
@@ -228,6 +238,17 @@ export const MemoCard = ({
           </div>
 
           <div className="flex items-center gap-1">
+            {privacyMode && (
+              <button
+                type="button"
+                onClick={() => setIsUnmasked(!isUnmasked)}
+                className={`btn btn-xs btn-ghost btn-square ${isMasked ? 'text-warning' : 'text-base-content/40 hover:text-base-content'}`}
+                title={isMasked ? 'Click to reveal note' : 'Hide note content'}
+              >
+                {isMasked ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => setIsShareModalOpen(true)}
@@ -296,14 +317,30 @@ export const MemoCard = ({
             </div>
           </div>
         ) : (
-          <div
-            className={`markdown-body text-sm mt-1 select-text ${
-              layout === 'grid' ? 'max-h-[380px] overflow-y-auto pr-1' : ''
-            }`}
-            onMouseUp={handleMouseUp}
-            onClick={handleContentClick}
-            dangerouslySetInnerHTML={renderMarkdown(memo.content)}
-          />
+          <div className="relative mt-1">
+            <div
+              className={`markdown-body text-sm select-text transition-all duration-200 ${
+                isMasked ? 'privacy-masked select-none' : ''
+              } ${
+                layout === 'grid' ? 'max-h-[380px] overflow-y-auto pr-1' : ''
+              }`}
+              onMouseUp={handleMouseUp}
+              onClick={handleContentClick}
+              dangerouslySetInnerHTML={renderMarkdown(memo.content)}
+            />
+            {isMasked && (
+              <div
+                onClick={() => setIsUnmasked(true)}
+                className="absolute inset-0 z-10 flex flex-col items-center justify-center cursor-pointer bg-base-100/30 hover:bg-base-100/50 rounded-lg backdrop-blur-[2px] transition-colors"
+                title="Click to reveal note content"
+              >
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-base-200/90 shadow-md border border-base-content/10 text-xs font-medium text-base-content/70 hover:text-base-content">
+                  <Eye className="w-3.5 h-3.5 text-primary" />
+                  <span>Hidden (Privacy Mode) · Click to reveal</span>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Floating AI Button on text selection */}
