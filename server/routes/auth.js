@@ -269,11 +269,15 @@ router.post('/resend-verification', async (req, res) => {
     `).run(verificationToken, verificationExpires, now, user.id);
 
     const origin = req.headers.origin || `${req.protocol}://${req.get('host')}`;
-    await sendVerificationEmail({
-      to: cleanEmail,
-      token: verificationToken,
-      hostUrl: origin
-    });
+    try {
+      await sendVerificationEmail({
+        to: cleanEmail,
+        token: verificationToken,
+        hostUrl: origin
+      });
+    } catch (mailErr) {
+      console.error('[Auth] Failed sending verification email during resend:', mailErr.message);
+    }
 
     logAudit(user.id, 'verification_email_resent', { email: cleanEmail });
 

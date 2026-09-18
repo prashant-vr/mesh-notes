@@ -131,11 +131,35 @@ export const MemoCard = ({
     );
   }
 
+  const [aiTooltip, setAiTooltip] = useState(null);
+  const cardRef = React.useRef(null);
+
   const handleMouseUp = () => {
     const selection = window.getSelection();
     const text = selection ? selection.toString().trim() : '';
+
     if (text && text.length >= 3 && onTriggerAiSelection) {
-      onTriggerAiSelection(text, memo.content);
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      const cardRect = cardRef.current ? cardRef.current.getBoundingClientRect() : { left: 0, top: 0 };
+
+      setAiTooltip({
+        text,
+        x: rect.left + rect.width / 2 - cardRect.left,
+        y: rect.top - cardRect.top - 8
+      });
+    } else {
+      setAiTooltip(null);
+    }
+  };
+
+  const handleTriggerAiFromTooltip = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (aiTooltip?.text && onTriggerAiSelection) {
+      onTriggerAiSelection(aiTooltip.text, memo.content);
+      setAiTooltip(null);
+      window.getSelection()?.removeAllRanges();
     }
   };
 
@@ -167,7 +191,8 @@ export const MemoCard = ({
 
   return (
     <article
-      className={`card bg-base-100 border transition-all duration-200 shadow-sm ${
+      ref={cardRef}
+      className={`card bg-base-100 border transition-all duration-200 shadow-sm relative ${
         layout === 'grid' ? 'h-full flex flex-col justify-between' : ''
       } ${
         memo.pinned ? 'border-primary/50 shadow-md ring-1 ring-primary/20' : 'border-base-content/10 hover:border-base-content/20'
@@ -279,6 +304,25 @@ export const MemoCard = ({
             onClick={handleContentClick}
             dangerouslySetInnerHTML={renderMarkdown(memo.content)}
           />
+        )}
+
+        {/* Floating AI Button on text selection */}
+        {aiTooltip && (
+          <div
+            className="absolute z-30 transform -translate-x-1/2 -translate-y-full animate-fadeIn pointer-events-auto"
+            style={{ left: `${aiTooltip.x}px`, top: `${aiTooltip.y}px` }}
+          >
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleTriggerAiFromTooltip}
+              className="btn btn-xs btn-primary gap-1 shadow-lg hover:scale-105 transition-transform rounded-full px-2.5 py-1 text-[11px] font-medium"
+              title="Ask AI about selected text"
+            >
+              <Sparkles className="w-3 h-3 text-warning animate-pulse" />
+              <span>Ask AI</span>
+            </button>
+          </div>
         )}
 
         {/* Attached Bookmark Card */}

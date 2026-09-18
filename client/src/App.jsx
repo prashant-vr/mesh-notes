@@ -74,6 +74,7 @@ export const App = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLogsOpen, setIsLogsOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiModalPrefill, setAiModalPrefill] = useState('');
 
   // Composer prefill text from quote or AI
   const [composerPrefill, setComposerPrefill] = useState('');
@@ -553,8 +554,8 @@ export const App = () => {
                   onEdit={handleEditMemo}
                   onOpenReader={(bId) => setActiveReaderBookmarkId(bId)}
                   onUpdateBookmarkStatus={handleUpdateBookmarkStatus}
-                  onTriggerAiSelection={(text, context) => {
-                    // Open reader or AI modal with text
+                  onTriggerAiSelection={(text) => {
+                    setAiModalPrefill(text);
                     setIsAiModalOpen(true);
                   }}
                 />
@@ -612,7 +613,11 @@ export const App = () => {
       {/* AI Generate / Ask AI Modal */}
       <AiGenerateModal
         isOpen={isAiModalOpen}
-        onClose={() => setIsAiModalOpen(false)}
+        initialQuery={aiModalPrefill}
+        onClose={() => {
+          setIsAiModalOpen(false);
+          setAiModalPrefill('');
+        }}
         onInsertToComposer={(text) => {
           setComposerPrefill((prev) => (prev ? `${prev}\n\n${text}` : text));
         }}

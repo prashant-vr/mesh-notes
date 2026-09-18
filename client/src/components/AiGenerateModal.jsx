@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, X, Send, Copy, Check, ArrowDownToLine, Loader2 } from 'lucide-react';
 import { apiListPrompts, apiStreamAI } from '../api.js';
 
-export const AiGenerateModal = ({ isOpen, onClose, onInsertToComposer }) => {
+export const AiGenerateModal = ({ isOpen, onClose, onInsertToComposer, initialQuery = '' }) => {
   const [prompts, setPrompts] = useState([]);
   const [selectedPromptId, setSelectedPromptId] = useState('');
-  const [inputQuery, setInputQuery] = useState('');
+  const [inputQuery, setInputQuery] = useState(initialQuery);
   const [output, setOutput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -13,7 +13,7 @@ export const AiGenerateModal = ({ isOpen, onClose, onInsertToComposer }) => {
   useEffect(() => {
     if (!isOpen) return;
     setOutput('');
-    setInputQuery('');
+    setInputQuery(initialQuery || '');
     apiListPrompts('generation')
       .then((res) => {
         setPrompts(res.prompts || []);
@@ -22,7 +22,7 @@ export const AiGenerateModal = ({ isOpen, onClose, onInsertToComposer }) => {
         }
       })
       .catch(() => {});
-  }, [isOpen]);
+  }, [isOpen, initialQuery]);
 
   const handleGenerate = async (e) => {
     e?.preventDefault();

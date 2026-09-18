@@ -1,7 +1,11 @@
 import nodemailer from 'nodemailer';
 
 // Reads SMTP configuration from environment variables
+let cachedTransporter = null;
+
 export const getMailTransporter = () => {
+  if (cachedTransporter) return cachedTransporter;
+
   const host = process.env.SMTP_HOST;
   const port = parseInt(process.env.SMTP_PORT || '587', 10);
   const user = process.env.SMTP_USER;
@@ -12,15 +16,23 @@ export const getMailTransporter = () => {
     return null; // SMTP not configured
   }
 
-  return nodemailer.createTransport({
+  cachedTransporter = nodemailer.createTransport({
     host,
     port,
     secure,
     auth: {
       user,
       pass
-    }
+    },
+    tls: {
+      rejectUnauthorized: false
+    },
+    pool: true,
+    maxConnections: 3,
+    maxMessages: 50
   });
+
+  return cachedTransporter;
 };
 
 export const isSmtpConfigured = () => {
